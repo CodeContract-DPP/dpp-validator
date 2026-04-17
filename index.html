@@ -78,9 +78,7 @@ select:focus,input:focus{outline:none;border-color:var(--cc-light);box-shadow:0 
   </div>
 </div>
 
-<div class="banner">
-  <strong>El Pasaporte Digital de la Silla CODE cumple con el est&aacute;ndar CIRPASS-2 y ha sido inscrito en el simulador del Registro Central EU.</strong>
-</div>
+<div class="banner" id="bannerMsg" style="display:none"></div>
 
 <div class="container">
 
@@ -110,11 +108,8 @@ select:focus,input:focus{outline:none;border-color:var(--cc-light);box-shadow:0 
   <div class="card">
     <h2><span class="icon">&#128196;</span> Direcci&oacute;n web del DPP</h2>
     <label>URL de la p&aacute;gina web del Pasaporte Digital de Producto</label>
-    <input type="text" id="urlInput" placeholder="https://ejemplo.github.io/mi-producto/" autocomplete="off">
-    <div style="margin-top:.8rem">
-      <button class="example-btn" onclick="loadExample('silla')">&#9654; Silla CODE (Mobiliario)</button>
-      <button class="example-btn" onclick="loadExample('alterity')">&#9654; Alterity LMT (Bater&iacute;a)</button>
-    </div>
+    <input type="text" id="urlInput" placeholder="https://dpp.tu-empresa.com/producto/" autocomplete="off">
+    <p style="margin-top:.6rem;font-size:.82rem;color:var(--cc-muted);line-height:1.5">Ejemplo: https://dpp.tu-empresa.com/producto/ &mdash; El validador buscar&aacute; autom&aacute;ticamente los datos JSON del pasaporte digital.</p>
     <div class="status-msg" id="statusMsg"></div>
     <button class="btn-validate" id="validateBtn" onclick="validate()">
       <div class="spinner"></div>
@@ -366,4 +361,30 @@ function renderResults(results, passed, failed, missing) {
     '<div class="stat green"><div class="num">'+passed+'</div><div class="label">Correctas</div></div>'+
     '<div class="stat red"><div class="num">'+failed+'</div><div class="label">Con errores</div></div>'+
     '<div class="stat orange"><div class="num">'+missing+'</div><div class="label">Ausentes</div></div>';
-  document.getElementById('sectionsGrid').innerHTML = resu
+  document.getElementById('sectionsGrid').innerHTML = results.map(function(r) {
+    return '<div class="section-card '+r.status+'"><div class="section-header">'+
+      '<div class="section-status '+r.status+'">'+(r.status==='pass'?'\u2713':r.status==='fail'?'\u2717':'?')+'</div>'+
+      '<div class="section-name">'+r.name+'</div></div>'+
+      '<div class="section-detail">'+(r.status==='pass'?'Estructura correcta y completa':r.status==='missing'?'Esta secci\u00f3n no existe en el DPP':r.errors.length+' campo(s) con problemas')+'</div>'+
+      (r.errors.length>0&&r.status!=='missing'?'<ul class="error-list">'+r.errors.slice(0,5).map(function(e){return '<li>'+e+'</li>'}).join('')+(r.errors.length>5?'<li>... y '+(r.errors.length-5)+' m\u00e1s</li>':'')+'</ul>':'')+
+    '</div>';
+  }).join('');
+
+  // Show banner with result
+  var bannerEl = document.getElementById('bannerMsg');
+  if (isValid) {
+    bannerEl.style.display = 'block';
+    bannerEl.style.background = 'linear-gradient(135deg,#1a5c3a,#27ae60)';
+    bannerEl.innerHTML = '<strong>DPP V\u00c1LIDO \u2014 Todas las secciones cumplen con el est\u00e1ndar CIRPASS-2</strong>';
+  } else {
+    bannerEl.style.display = 'block';
+    bannerEl.style.background = 'linear-gradient(135deg,#922b21,#e74c3c)';
+    bannerEl.innerHTML = '<strong>DPP NO V\u00c1LIDO \u2014 ' + (failed + missing) + ' secci\u00f3n(es) requieren correcci\u00f3n</strong>';
+  }
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
